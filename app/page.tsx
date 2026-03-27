@@ -1,23 +1,31 @@
-const products = [
-  {
-    name: "Smart POS",
-    desc: "Sell, manage inventory, sync orders, and connect optional Salesforce workflows.",
-    price: "From $49/mo",
-    status: "Live"
-  },
-  {
-    name: "Booking Platform",
-    desc: "Reservations, customer records, and operational dashboards for service businesses.",
-    price: "From $79/mo",
-    status: "Planned"
-  },
-  {
-    name: "Inventory Control",
-    desc: "Stock movement, supplier visibility, reorder levels, and reporting.",
-    price: "Custom",
-    status: "Planned"
-  }
-];
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+
+type Product = {
+  key: string;
+  name: string;
+  status: string;
+  startingPrice: string;
+};
+
+type HealthStatus = {
+  service: string;
+  status: string;
+  timestamp: string;
+};
+
+type ProvisioningResponse = {
+  jobId: string;
+  status: string;
+  message: string;
+};
+
+const productDescriptions: Record<string, string> = {
+  "smart-pos": "Sell, manage inventory, sync orders, and connect optional Salesforce workflows.",
+  "booking-platform": "Reservations, customer records, and operational dashboards for service businesses.",
+  "inventory-control": "Stock movement, supplier visibility, reorder levels, and reporting."
+};
 
 const stats = [
   ["Products", "3"],
@@ -62,6 +70,93 @@ const jobs = [
 const nav = ["Products", "Plans", "Provisioning", "Admin", "Support"];
 
 export default function Home() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [health, setHealth] = useState<HealthStatus | null>(null);
+  const [pageError, setPageError] = useState<string | null>(null);
+  const [loadingProducts, setLoadingProducts] = useState(true);
+  const [provisioningResult, setProvisioningResult] = useState<ProvisioningResponse | null>(null);
+  const [isProvisioning, setIsProvisioning] = useState(false);
+
+  useEffect(() => {
+    const loadPageData = async () => {
+      try {
+        setPageError(null);
+        const [productsRes, healthRes] = await Promise.all([
+          fetch("/api/catalog/products", { cache: "no-store" }),
+          fetch("/api/support/status", { cache: "no-store" })
+        ]);
+
+        if (!productsRes.ok) {
+          throw new Error("Unable to load product catalog");
+        }
+
+        if (!healthRes.ok) {
+          throw new Error("Control plane health check failed");
+        }
+
+        const [productsData, healthData]: [Product[], HealthStatus] = await Promise.all([
+          productsRes.json(),
+          healthRes.json()
+        ]);
+
+        setProducts(productsData);
+        setHealth(healthData);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Unexpected error while loading data";
+        setPageError(message);
+      } finally {
+        setLoadingProducts(false);
+      }
+    };
+
+    void loadPageData();
+  }, []);
+
+  const displayedStats = useMemo(() => {
+    return stats.map(([label, value]) => {
+      if (label === "Products") {
+        return [label, String(products.length || value)];
+      }
+      return [label, value];
+    });
+  }, [products]);
+
+  const startProvisioning = async () => {
+    setIsProvisioning(true);
+    setProvisioningResult(null);
+    setPageError(null);
+
+    try {
+      const defaultProduct = products[0] ?? { key: "smart-pos" };
+      const response = await fetch("/api/provisioning/jobs", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          customerId: "demo-customer-001",
+          productKey: defaultProduct.key,
+          planKey: "growth",
+          domainOption: "BUY_NEW",
+          databaseOption: "DEDICATED"
+        })
+      });
+
+      const responseBody = await response.json();
+
+      if (!response.ok) {
+        throw new Error(responseBody?.error ?? "Failed to create provisioning job");
+      }
+
+      setProvisioningResult(responseBody as ProvisioningResponse);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unexpected provisioning error";
+      setPageError(message);
+    } finally {
+      setIsProvisioning(false);
+    }
+  };
+
   return (
     <div className="min-h-screen text-lotus-ink">
       <header className="border-b border-lotus-ink/10 bg-white/75 backdrop-blur-xl">
@@ -94,13 +189,35 @@ export default function Home() {
               and an internal control dashboard for provisioning and support.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
-              <button className="rounded-2xl bg-lotus-ink px-5 py-3 text-sm font-semibold text-white">Start Free Demo</button>
+              <button
+                className="rounded-2xl bg-lotus-ink px-5 py-3 text-sm font-semibold text-white disabled:opacity-60"
+                onClick={startProvisioning}
+                disabled={isProvisioning}
+                type="button"
+              >
+                {isProvisioning ? "Starting..." : "Start Free Demo"}
+              </button>
               <button className="rounded-2xl border border-lotus-ink/25 px-5 py-3 text-sm font-semibold text-lotus-ink">
                 View Products
               </button>
             </div>
+            {(pageError || provisioningResult || health) && (
+              <div className="mt-4 space-y-2 text-sm">
+                {pageError && <div className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-rose-700">{pageError}</div>}
+                {provisioningResult && (
+                  <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-emerald-800">
+                    Job {provisioningResult.jobId} created with status {provisioningResult.status}.
+                  </div>
+                )}
+                {health && (
+                  <div className="rounded-xl border border-lotus-ink/10 bg-lotus-sand/50 px-3 py-2 text-lotus-ink/80">
+                    Control plane {health.service} is {health.status}.
+                  </div>
+                )}
+              </div>
+            )}
             <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              {stats.map(([label, value], index) => (
+              {displayedStats.map(([label, value], index) => (
                 <div key={label} className="rounded-2xl border border-lotus-ink/10 bg-white p-4 fade-rise" style={{ animationDelay: `${index * 80}ms` }}>
                   <div className="text-sm text-lotus-ink/60">{label}</div>
                   <div className="mt-2 text-2xl font-bold">{value}</div>
@@ -133,14 +250,24 @@ export default function Home() {
             <button className="rounded-2xl border border-lotus-ink/20 px-4 py-2 text-sm font-semibold">Manage Catalog</button>
           </div>
           <div className="grid gap-5 lg:grid-cols-3">
-            {products.map((product, index) => (
+            {loadingProducts && (
+              <div className="rounded-2xl border border-lotus-ink/10 bg-lotus-sand/35 p-6 text-sm text-lotus-ink/70">
+                Loading catalog from control plane...
+              </div>
+            )}
+            {!loadingProducts && products.length === 0 && (
+              <div className="rounded-2xl border border-lotus-ink/10 bg-lotus-sand/35 p-6 text-sm text-lotus-ink/70">
+                No products returned by control plane.
+              </div>
+            )}
+            {!loadingProducts && products.map((product, index) => (
               <div key={product.name} className="rounded-3xl border border-lotus-ink/10 bg-lotus-sand/35 p-6 fade-rise" style={{ animationDelay: `${index * 60}ms` }}>
                 <div className="flex items-center justify-between">
                   <h3 className="text-xl font-semibold">{product.name}</h3>
-                  <span className="rounded-full bg-white px-3 py-1 text-xs font-medium text-lotus-ink/70">{product.status}</span>
+                  <span className="rounded-full bg-white px-3 py-1 text-xs font-medium text-lotus-ink/70">{product.status.toLowerCase()}</span>
                 </div>
-                <p className="mt-4 text-sm leading-6 text-lotus-ink/70">{product.desc}</p>
-                <div className="mt-6 text-lg font-bold">{product.price}</div>
+                <p className="mt-4 text-sm leading-6 text-lotus-ink/70">{productDescriptions[product.key] ?? "Managed product listing"}</p>
+                <div className="mt-6 text-lg font-bold">From ${product.startingPrice}</div>
                 <button className="mt-5 w-full rounded-2xl bg-lotus-ink/10 px-4 py-3 text-sm font-semibold text-lotus-ink">
                   View details
                 </button>

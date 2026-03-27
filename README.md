@@ -1,14 +1,11 @@
 # Lotus Systems
 
-Production-oriented monorepo for a **multi-product marketplace + provisioning platform** that deploys **isolated customer environments** (separate runtime + separate database per customer).
+Production-oriented workspace for a **multi-product marketplace + provisioning platform** that deploys **isolated customer environments** (separate runtime + separate database per customer).
 
-## What this repo contains (scaffold)
-- `apps/web` — Next.js (TypeScript) marketplace + customer/admin portal (Tailwind CSS)
-- `apps/control-plane-api` — Spring Boot control plane REST API (platform metadata + orchestration)
-- `apps/provisioning-worker` — background worker for step-based provisioning jobs
-- `apps/product-pos-template` — starter template for an isolated Smart POS runtime (frontend/backend/db migrations)
-- `packages/*` — shared UI, types, and provider SDKs (billing/domain/database/provisioning)
-- `.github/copilot-instructions.md` — primary Copilot instruction file for this project
+## What this repo contains
+- `app` — Next.js App Router frontend for marketplace and dashboard preview
+- `control-plane` — Spring Boot control plane REST API
+- `supabase` — Supabase config, migrations, and functions directory
 
 ## Core principles
 - **No shared multi-tenant runtime for product operational data**
@@ -16,22 +13,38 @@ Production-oriented monorepo for a **multi-product marketplace + provisioning pl
 - Provider abstractions for **domains** and **databases**
 - Step-based, **idempotent** provisioning with retries, audit logs, and traceability
 
-## Getting started (pnpm)
-> This repo uses **pnpm workspaces**.
+## Getting started
 
 ```bash
-pnpm -v
-pnpm install
+npm install
 ```
 
-### Run the web app (once scaffolded)
+### Run the web app
 ```bash
-cd apps/web
-pnpm dev
+npm run dev
 ```
 
-## Status
-This is the initial project scaffold branch: `scaffold/lotus-systems`.
+### Run the control plane
+```bash
+cd control-plane
+mvn spring-boot:run
+```
+
+## End-to-end local flow
+
+1. Start the control plane on port `8080`.
+2. Start the Next.js app on port `3000`.
+3. Open the homepage and click "Start Free Demo".
+4. The frontend will:
+	- load product catalog from `/api/catalog/products`
+	- load control-plane health from `/api/support/status`
+	- create provisioning jobs via `/api/provisioning/jobs`
+
+By default, Next.js proxies to `http://localhost:8080`. To target another control-plane URL:
+
+```bash
+CONTROL_PLANE_API_URL=http://your-host:8080 npm run dev
+```
 
 ## Supabase deployment
 
