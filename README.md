@@ -57,6 +57,35 @@ By default, Next.js proxies to `http://localhost:8080`. To target another contro
 CONTROL_PLANE_API_URL=http://your-host:8080 npm run dev
 ```
 
+## Supabase database schema
+
+This repo now includes a first migration and seed set for Supabase:
+
+- Migration: `supabase/migrations/20260327120000_init_lotus_schema.sql`
+- Seed data: `supabase/seed.sql`
+
+Tables created:
+- `products`
+- `customers`
+- `subscriptions`
+- `checkout_sessions`
+- `provisioning_jobs`
+- `stripe_settings`
+
+To apply schema + seed locally:
+
+```bash
+npx supabase start
+npx supabase db reset
+```
+
+To apply to linked cloud project:
+
+```bash
+npm run supabase:link
+npx supabase db push
+```
+
 ## Supabase deployment
 
 This repo is initialized for Supabase CLI usage and is configured to link to:
