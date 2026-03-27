@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: lotus-control-plane
+  datasource:
+    url: ${CP_DB_URL:jdbc:postgresql://localhost:5432/lotus_control_plane}
+    username: ${CP_DB_USER:postgres}
+    password: ${CP_DB_PASSWORD:postgres}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+lotus:
+  provisioning:
+    retry-limit: 5
+    audit-enabled: true
