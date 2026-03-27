@@ -6,7 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "supabase:login": "npx supabase login",
+    "supabase:link": "npx supabase link --project-ref baxnuqioqfuqieyqqzlr",
+    "supabase:db:push": "npx supabase db push",
+    "supabase:functions:deploy": "bash -lc 'set -e; if [ -d supabase/functions ] && find supabase/functions -mindepth 1 -maxdepth 1 -type d | grep -q .; then for fn in $(find supabase/functions -mindepth 1 -maxdepth 1 -type d -printf \"%f\\n\"); do echo \"Deploying function: $fn\"; npx supabase functions deploy \"$fn\"; done; else echo \"No Edge Functions found in supabase/functions, skipping deploy.\"; fi'",
+    "supabase:deploy": "npm run supabase:link && npm run supabase:db:push && npm run supabase:functions:deploy"
   },
   "dependencies": {
     "next": "14.2.10",
@@ -21,6 +26,7 @@
     "eslint": "8.57.1",
     "eslint-config-next": "14.2.10",
     "postcss": "8.4.45",
+    "supabase": "^2.84.4",
     "tailwindcss": "3.4.12",
     "typescript": "5.5.4"
   }

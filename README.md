@@ -32,3 +32,38 @@ pnpm dev
 
 ## Status
 This is the initial project scaffold branch: `scaffold/lotus-systems`.
+
+## Supabase deployment
+
+This repo is initialized for Supabase CLI usage and is configured to link to:
+
+- Project name: Lotus Systems
+- Project ref: baxnuqioqfuqieyqqzlr
+
+### One-time auth
+
+```bash
+npm run supabase:login
+```
+
+If you are in CI or a headless terminal, set an access token instead:
+
+```bash
+export SUPABASE_ACCESS_TOKEN=your_personal_access_token
+```
+
+### Deploy workflow
+
+```bash
+npm run supabase:link
+npm run supabase:db:push
+npm run supabase:functions:deploy
+```
+
+Or run all steps at once:
+
+```bash
+npm run supabase:deploy
+```
+
+If no Edge Functions exist under `supabase/functions`, the deploy script now skips that step automatically instead of failing.
