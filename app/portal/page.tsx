@@ -1,8 +1,10 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
+import Link from "next/link";
 
 import { TopNav } from "@/app/components/TopNav";
+import { useAuth } from "@/app/components/AuthProvider";
 
 type CustomerProfile = {
   customerId: string;
@@ -59,7 +61,9 @@ type SupportTicket = {
 };
 
 export default function PortalPage() {
-  const [customerId, setCustomerId] = useState("demo-customer-001");
+  const { isHydrated, session } = useAuth();
+
+  const [customerId, setCustomerId] = useState(session.customerId ?? "demo-customer-001");
   const [profile, setProfile] = useState<CustomerProfile | null>(null);
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [environments, setEnvironments] = useState<Environment[]>([]);
@@ -69,12 +73,11 @@ export default function PortalPage() {
   const [support, setSupport] = useState<SupportTicket[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  const loadPortal = async (event: FormEvent) => {
-    event.preventDefault();
+  const loadPortalData = async (nextCustomerId: string) => {
     setError(null);
 
     try {
-      const encodedCustomerId = encodeURIComponent(customerId);
+      const encodedCustomerId = encodeURIComponent(nextCustomerId);
       const [profileRes, subRes, envRes, updatesRes, docsRes, billingRes, supportRes] = await Promise.all([
         fetch(`/api/portal/me?customerId=${encodedCustomerId}`, { cache: "no-store" }),
         fetch(`/api/portal/subscriptions?customerId=${encodedCustomerId}`, { cache: "no-store" }),
@@ -101,6 +104,40 @@ export default function PortalPage() {
       setError(message);
     }
   };
+
+  const loadPortal = async (event: FormEvent) => {
+    event.preventDefault();
+    await loadPortalData(customerId);
+  };
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const nextCustomerId = params.get("customerId") ?? session.customerId ?? "demo-customer-001";
+    setCustomerId(nextCustomerId);
+  }, [session.customerId]);
+
+  useEffect(() => {
+    if (isHydrated && session.role === "customer" && customerId) {
+      void loadPortalData(customerId);
+    }
+  }, [customerId, isHydrated, session.role]);
+
+  if (isHydrated && session.role !== "customer") {
+    return (
+      <div className="min-h-screen text-lotus-ink">
+        <TopNav />
+        <main className="mx-auto max-w-3xl px-6 py-8">
+          <section className="rounded-3xl border border-lotus-ink/10 bg-white p-6 shadow-panel">
+            <h1 className="text-3xl font-bold">Customer access required</h1>
+            <p className="mt-2 text-lotus-ink/70">Sign in as a customer to view subscriptions, environments, updates, and support.</p>
+            <Link href="/login?role=customer&redirect=%2Fportal" className="mt-5 inline-flex rounded-xl bg-lotus-ink px-4 py-2 font-semibold text-white">
+              Go to Customer Login
+            </Link>
+          </section>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen text-lotus-ink">
