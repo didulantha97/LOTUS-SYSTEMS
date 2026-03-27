@@ -41,7 +41,11 @@ public class PlatformDataService {
                 request.name(),
                 request.status(),
                 request.startingPrice(),
-                request.description()
+                request.description(),
+                request.repositoryUrl(),
+                request.documentationUrl(),
+                request.latestVersion(),
+                request.downloadUrl()
         );
         products.put(product.key(), product);
         return product;
@@ -58,7 +62,11 @@ public class PlatformDataService {
                 current.name(),
                 status,
                 current.startingPrice(),
-                current.description()
+                current.description(),
+                current.repositoryUrl(),
+                current.documentationUrl(),
+                current.latestVersion(),
+                current.downloadUrl()
         );
         products.put(key, updated);
         return updated;
@@ -152,27 +160,43 @@ public class PlatformDataService {
                 .toList();
     }
 
+    public ProductConfig getProduct(String key) {
+        return products.get(key);
+    }
+
     private void seedProducts() {
         products.put("smart-pos", new ProductConfig(
                 "smart-pos",
                 "Smart POS",
                 "LIVE",
                 "49/mo",
-                "Sell, manage inventory, sync orders, and connect optional Salesforce workflows."
+                "Sell, manage inventory, sync orders, and connect optional Salesforce workflows.",
+                "https://github.com/lotus-systems/smart-pos",
+                "https://docs.lotussystems.example/smart-pos",
+                "v3.4.1",
+                "https://downloads.lotussystems.example/smart-pos/v3.4.1"
         ));
         products.put("booking-platform", new ProductConfig(
                 "booking-platform",
                 "Booking Platform",
                 "PLANNED",
                 "79/mo",
-                "Reservations, customer records, and operational dashboards for service businesses."
+                "Reservations, customer records, and operational dashboards for service businesses.",
+                "https://github.com/lotus-systems/booking-platform",
+                "https://docs.lotussystems.example/booking-platform",
+                "v2.1.0",
+                "https://downloads.lotussystems.example/booking-platform/v2.1.0"
         ));
         products.put("inventory-control", new ProductConfig(
                 "inventory-control",
                 "Inventory Control",
                 "PLANNED",
                 "custom",
-                "Stock movement, supplier visibility, reorder levels, and reporting."
+                "Stock movement, supplier visibility, reorder levels, and reporting.",
+                "https://github.com/lotus-systems/inventory-control",
+                "https://docs.lotussystems.example/inventory-control",
+                "v1.8.5",
+                "https://downloads.lotussystems.example/inventory-control/v1.8.5"
         ));
     }
 

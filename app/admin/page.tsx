@@ -10,6 +10,10 @@ type Product = {
   status: string;
   startingPrice: string;
   description?: string;
+  repositoryUrl?: string;
+  documentationUrl?: string;
+  latestVersion?: string;
+  downloadUrl?: string;
 };
 
 type Customer = {
@@ -36,7 +40,11 @@ export default function AdminPage() {
     name: "",
     status: "PLANNED",
     startingPrice: "99/mo",
-    description: ""
+    description: "",
+    repositoryUrl: "",
+    documentationUrl: "",
+    latestVersion: "",
+    downloadUrl: ""
   });
 
   const [newCustomer, setNewCustomer] = useState<Customer>({
@@ -96,7 +104,17 @@ export default function AdminPage() {
       return;
     }
 
-    setNewProduct({ key: "", name: "", status: "PLANNED", startingPrice: "99/mo", description: "" });
+    setNewProduct({
+      key: "",
+      name: "",
+      status: "PLANNED",
+      startingPrice: "99/mo",
+      description: "",
+      repositoryUrl: "",
+      documentationUrl: "",
+      latestVersion: "",
+      downloadUrl: ""
+    });
     await load();
   };
 
@@ -164,6 +182,7 @@ export default function AdminPage() {
                 <div>
                   <div className="font-semibold">{product.name}</div>
                   <div className="text-lotus-ink/65">{product.key} • {product.startingPrice}</div>
+                  <div className="text-lotus-ink/65">Latest: {product.latestVersion ?? "n/a"}</div>
                 </div>
                 <button type="button" className="rounded-xl bg-lotus-ink px-3 py-2 text-white" onClick={() => toggleProductStatus(product)}>
                   {product.status === "LIVE" ? "Pause" : "Go Live"}
@@ -177,6 +196,10 @@ export default function AdminPage() {
             <input value={newProduct.name} onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })} className="rounded-xl border border-lotus-ink/20 px-3 py-2" placeholder="name" required />
             <input value={newProduct.startingPrice} onChange={(e) => setNewProduct({ ...newProduct, startingPrice: e.target.value })} className="rounded-xl border border-lotus-ink/20 px-3 py-2" placeholder="starting price" required />
             <textarea value={newProduct.description} onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })} className="rounded-xl border border-lotus-ink/20 px-3 py-2" placeholder="description" required />
+            <input value={newProduct.latestVersion} onChange={(e) => setNewProduct({ ...newProduct, latestVersion: e.target.value })} className="rounded-xl border border-lotus-ink/20 px-3 py-2" placeholder="latest version (e.g. v1.0.0)" />
+            <input value={newProduct.repositoryUrl} onChange={(e) => setNewProduct({ ...newProduct, repositoryUrl: e.target.value })} className="rounded-xl border border-lotus-ink/20 px-3 py-2" placeholder="repository URL" />
+            <input value={newProduct.documentationUrl} onChange={(e) => setNewProduct({ ...newProduct, documentationUrl: e.target.value })} className="rounded-xl border border-lotus-ink/20 px-3 py-2" placeholder="documentation URL" />
+            <input value={newProduct.downloadUrl} onChange={(e) => setNewProduct({ ...newProduct, downloadUrl: e.target.value })} className="rounded-xl border border-lotus-ink/20 px-3 py-2" placeholder="download URL" />
             <button type="submit" className="rounded-xl bg-lotus-jade px-4 py-2 text-white">Save Product</button>
           </form>
         </section>

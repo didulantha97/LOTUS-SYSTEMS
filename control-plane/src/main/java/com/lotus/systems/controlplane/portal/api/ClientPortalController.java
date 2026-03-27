@@ -1,6 +1,7 @@
 package com.lotus.systems.controlplane.portal.api;
 
 import com.lotus.systems.controlplane.platform.domain.CustomerAccount;
+import com.lotus.systems.controlplane.platform.domain.ProductConfig;
 import com.lotus.systems.controlplane.platform.domain.SubscriptionRecord;
 import com.lotus.systems.controlplane.platform.service.PlatformDataService;
 import jakarta.validation.constraints.NotBlank;
@@ -44,6 +45,71 @@ public class ClientPortalController {
                         "productKey", sub.productKey(),
                         "status", sub.environmentStatus(),
                         "domain", sub.domain()
+                ))
+                .toList();
+    }
+
+    @GetMapping("/updates")
+    public List<Map<String, String>> updates(@RequestParam @NotBlank String customerId) {
+        return platformDataService.listSubscriptionsByCustomer(customerId).stream()
+                .map(subscription -> {
+                    ProductConfig product = platformDataService.getProduct(subscription.productKey());
+                    String latestVersion = product == null || product.latestVersion() == null ? "Unknown" : product.latestVersion();
+                    return Map.of(
+                            "productKey", subscription.productKey(),
+                            "subscriptionId", subscription.subscriptionId(),
+                            "latestVersion", latestVersion,
+                            "status", subscription.status()
+                    );
+                })
+                .toList();
+    }
+
+    @GetMapping("/documentation")
+    public List<Map<String, String>> documentation(@RequestParam @NotBlank String customerId) {
+        return platformDataService.listSubscriptionsByCustomer(customerId).stream()
+                .map(subscription -> {
+                    ProductConfig product = platformDataService.getProduct(subscription.productKey());
+                    String docsUrl = product == null || product.documentationUrl() == null ? "" : product.documentationUrl();
+                    String repoUrl = product == null || product.repositoryUrl() == null ? "" : product.repositoryUrl();
+                    return Map.of(
+                            "productKey", subscription.productKey(),
+                            "subscriptionId", subscription.subscriptionId(),
+                            "documentationUrl", docsUrl,
+                            "repositoryUrl", repoUrl
+                    );
+                })
+                .toList();
+    }
+
+    @GetMapping("/billing")
+    public List<Map<String, String>> billing(@RequestParam @NotBlank String customerId) {
+        return platformDataService.listSubscriptionsByCustomer(customerId).stream()
+                .map(subscription -> {
+                    ProductConfig product = platformDataService.getProduct(subscription.productKey());
+                    String downloadUrl = product == null || product.downloadUrl() == null ? "" : product.downloadUrl();
+                    String latestVersion = product == null || product.latestVersion() == null ? "Unknown" : product.latestVersion();
+                    return Map.of(
+                            "invoiceId", "inv-" + subscription.subscriptionId(),
+                            "subscriptionId", subscription.subscriptionId(),
+                            "amount", subscription.planKey().equalsIgnoreCase("enterprise") ? "$499/mo" : "$149/mo",
+                            "billingStatus", subscription.status(),
+                            "latestVersion", latestVersion,
+                            "downloadUrl", downloadUrl
+                    );
+                })
+                .toList();
+    }
+
+    @GetMapping("/support")
+    public List<Map<String, String>> support(@RequestParam @NotBlank String customerId) {
+        return platformDataService.listSubscriptionsByCustomer(customerId).stream()
+                .map(subscription -> Map.of(
+                        "ticketId", "tkt-" + subscription.subscriptionId(),
+                        "productKey", subscription.productKey(),
+                        "priority", "HIGH",
+                        "status", "OPEN",
+                        "contact", "support@lotussystems.example"
                 ))
                 .toList();
     }
