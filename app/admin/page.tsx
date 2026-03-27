@@ -1,8 +1,10 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
+import Link from "next/link";
 
 import { TopNav } from "@/app/components/TopNav";
+import { useAuth } from "@/app/components/AuthProvider";
 
 type Product = {
   key: string;
@@ -30,6 +32,7 @@ type StripeConfig = {
 };
 
 export default function AdminPage() {
+  const { isHydrated, session } = useAuth();
   const [products, setProducts] = useState<Product[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [stripeConfig, setStripeConfig] = useState<StripeConfig | null>(null);
@@ -167,6 +170,24 @@ export default function AdminPage() {
 
     await load();
   };
+
+
+  if (isHydrated && session.role !== "admin") {
+    return (
+      <div className="min-h-screen text-lotus-ink">
+        <TopNav />
+        <main className="mx-auto max-w-3xl px-6 py-8">
+          <section className="rounded-3xl border border-lotus-ink/10 bg-white p-6 shadow-panel">
+            <h1 className="text-3xl font-bold">Admin access required</h1>
+            <p className="mt-2 text-lotus-ink/70">Sign in as an admin to manage products, customers, and Stripe configuration.</p>
+            <Link href="/login?role=admin&redirect=%2Fadmin" className="mt-5 inline-flex rounded-xl bg-lotus-ink px-4 py-2 font-semibold text-white">
+              Go to Admin Login
+            </Link>
+          </section>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen text-lotus-ink">
