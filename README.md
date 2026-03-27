@@ -47,7 +47,7 @@ mvn spring-boot:run
 - `/checkout` — create checkout session + simulate Stripe webhook completion
 - `/provisioning` — create provisioning jobs
 - `/admin` — manage products, manage customers, and configure Stripe keys
-- `/portal` — customer portal view for profile, subscriptions, and environments
+- `/portal` — customer portal view for profile, purchased products, environments, product updates, documentation access, billing/downloads, and support
 
 The UI routes call same-origin Next.js API proxies under `/api/*`, which forward to control-plane APIs under `/api/v1/*`.
 

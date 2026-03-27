@@ -40,7 +40,11 @@ public class AdminProductController {
                 request.name(),
                 request.status(),
                 request.startingPrice(),
-                request.description()
+                request.description(),
+                request.repositoryUrl(),
+                request.documentationUrl(),
+                request.latestVersion(),
+                request.downloadUrl()
         ));
     }
 
@@ -58,7 +62,11 @@ public class AdminProductController {
             @NotBlank String name,
             @NotBlank String status,
             @NotBlank String startingPrice,
-            @NotBlank String description
+            @NotBlank String description,
+            String repositoryUrl,
+            String documentationUrl,
+            String latestVersion,
+            String downloadUrl
     ) {
     }
 
