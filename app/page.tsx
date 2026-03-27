@@ -1,6 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+
+import { TopNav } from "@/app/components/TopNav";
 
 type Product = {
   key: string;
@@ -66,8 +69,6 @@ const jobs = [
     status: "Active"
   }
 ];
-
-const nav = ["Products", "Plans", "Provisioning", "Admin", "Support"];
 
 export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -159,21 +160,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen text-lotus-ink">
-      <header className="border-b border-lotus-ink/10 bg-white/75 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <div>
-            <div className="text-xs font-semibold uppercase tracking-[0.3em] text-lotus-ink/60">Lotus Systems</div>
-            <div className="text-2xl font-bold">Marketplace + Provisioning Platform</div>
-          </div>
-          <nav className="hidden gap-6 md:flex">
-            {nav.map((item) => (
-              <a key={item} className="text-sm font-medium text-lotus-ink/75 transition hover:text-lotus-ink" href="#">
-                {item}
-              </a>
-            ))}
-          </nav>
-        </div>
-      </header>
+      <TopNav />
 
       <main className="mx-auto max-w-7xl space-y-8 px-6 py-8">
         <section className="hero-grid fade-rise grid gap-6 rounded-3xl p-1 lg:grid-cols-[1.3fr_0.7fr]">
@@ -197,9 +184,9 @@ export default function Home() {
               >
                 {isProvisioning ? "Starting..." : "Start Free Demo"}
               </button>
-              <button className="rounded-2xl border border-lotus-ink/25 px-5 py-3 text-sm font-semibold text-lotus-ink">
+              <Link href="/products" className="rounded-2xl border border-lotus-ink/25 px-5 py-3 text-sm font-semibold text-lotus-ink">
                 View Products
-              </button>
+              </Link>
             </div>
             {(pageError || provisioningResult || health) && (
               <div className="mt-4 space-y-2 text-sm">
@@ -247,7 +234,7 @@ export default function Home() {
               <div className="text-sm font-semibold uppercase tracking-[0.24em] text-lotus-ink/60">Products Section</div>
               <h2 className="mt-2 text-3xl font-bold">Product cards for the marketplace homepage</h2>
             </div>
-            <button className="rounded-2xl border border-lotus-ink/20 px-4 py-2 text-sm font-semibold">Manage Catalog</button>
+            <Link href="/admin" className="rounded-2xl border border-lotus-ink/20 px-4 py-2 text-sm font-semibold">Manage Catalog</Link>
           </div>
           <div className="grid gap-5 lg:grid-cols-3">
             {loadingProducts && (

@@ -40,6 +40,17 @@ mvn spring-boot:run
 	- load control-plane health from `/api/support/status`
 	- create provisioning jobs via `/api/provisioning/jobs`
 
+## Added pages and flows
+
+- `/products` — live product catalog
+- `/plans` — plan matrix generated from product data
+- `/checkout` — create checkout session + simulate Stripe webhook completion
+- `/provisioning` — create provisioning jobs
+- `/admin` — manage products, manage customers, and configure Stripe keys
+- `/portal` — customer portal view for profile, subscriptions, and environments
+
+The UI routes call same-origin Next.js API proxies under `/api/*`, which forward to control-plane APIs under `/api/v1/*`.
+
 By default, Next.js proxies to `http://localhost:8080`. To target another control-plane URL:
 
 ```bash

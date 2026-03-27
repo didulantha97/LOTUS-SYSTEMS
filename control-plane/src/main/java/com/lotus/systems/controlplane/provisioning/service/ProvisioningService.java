@@ -17,6 +17,8 @@ public class ProvisioningService {
                 jobId,
                 ProvisioningStatus.ORDER_CREATED.name(),
                 "Provisioning workflow queued for customer " + request.customerId()
+                        + " on product " + request.productKey()
+                        + " with plan " + request.planKey()
         );
     }
 }
