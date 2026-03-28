@@ -57,6 +57,35 @@ By default, Next.js proxies to `http://localhost:8080`. To target another contro
 CONTROL_PLANE_API_URL=http://your-host:8080 npm run dev
 ```
 
+## Supabase database schema
+
+This repo now includes a first migration and seed set for Supabase:
+
+- Migration: `supabase/migrations/20260327120000_init_lotus_schema.sql`
+- Seed data: `supabase/seed.sql`
+
+Tables created:
+- `products`
+- `customers`
+- `subscriptions`
+- `checkout_sessions`
+- `provisioning_jobs`
+- `stripe_settings`
+
+To apply schema + seed locally:
+
+```bash
+npx supabase start
+npx supabase db reset
+```
+
+To apply to linked cloud project:
+
+```bash
+npm run supabase:link
+npx supabase db push
+```
+
 ## Supabase deployment
 
 This repo is initialized for Supabase CLI usage and is configured to link to:
@@ -91,3 +120,29 @@ npm run supabase:deploy
 ```
 
 If no Edge Functions exist under `supabase/functions`, the deploy script now skips that step automatically instead of failing.
+
+
+## Delivery plan and implemented end-to-end journeys
+
+### Phase 1 — Identity and access entry points
+- Add a shared client auth session with three modes: `guest`, `customer`, and `admin`.
+- Add a dedicated `/login` route with separate customer and admin forms.
+- Protect `/portal` for customer access and `/admin` for admin access.
+
+### Phase 2 — Product selection to checkout
+- Update `/products` so each card supports:
+  - guest checkout,
+  - customer login + continue,
+  - admin login entry.
+- Pass selected product and customer context into `/checkout` via query params.
+
+### Phase 3 — Checkout to provisioning completion
+- Keep checkout session creation and webhook simulation.
+- Chain provisioning job creation immediately after payment simulation.
+- Provide next-step links to customer portal or provisioning console after success.
+
+### Phase 4 — Validation and operations handoff
+- Validate via lint/build and manual route checks:
+  - guest product selection -> checkout -> provisioning,
+  - customer login -> product selection -> checkout -> provisioning -> portal,
+  - admin login -> admin dashboard and management actions.
