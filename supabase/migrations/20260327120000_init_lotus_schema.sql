@@ -126,48 +126,42 @@ alter table public.provisioning_jobs enable row level security;
 alter table public.stripe_settings enable row level security;
 
 -- For initial bootstrapping: allow authenticated service interactions.
-drop policy if exists "service_role_products_all" on public.products;
-create policy "service_role_products_all"
+create policy if not exists "service_role_products_all"
   on public.products
   for all
   to service_role
   using (true)
   with check (true);
 
-drop policy if exists "service_role_customers_all" on public.customers;
-create policy "service_role_customers_all"
+create policy if not exists "service_role_customers_all"
   on public.customers
   for all
   to service_role
   using (true)
   with check (true);
 
-drop policy if exists "service_role_subscriptions_all" on public.subscriptions;
-create policy "service_role_subscriptions_all"
+create policy if not exists "service_role_subscriptions_all"
   on public.subscriptions
   for all
   to service_role
   using (true)
   with check (true);
 
-drop policy if exists "service_role_checkout_sessions_all" on public.checkout_sessions;
-create policy "service_role_checkout_sessions_all"
+create policy if not exists "service_role_checkout_sessions_all"
   on public.checkout_sessions
   for all
   to service_role
   using (true)
   with check (true);
 
-drop policy if exists "service_role_provisioning_jobs_all" on public.provisioning_jobs;
-create policy "service_role_provisioning_jobs_all"
+create policy if not exists "service_role_provisioning_jobs_all"
   on public.provisioning_jobs
   for all
   to service_role
   using (true)
   with check (true);
 
-drop policy if exists "service_role_stripe_settings_all" on public.stripe_settings;
-create policy "service_role_stripe_settings_all"
+create policy if not exists "service_role_stripe_settings_all"
   on public.stripe_settings
   for all
   to service_role
